@@ -1,0 +1,79 @@
+<html>
+<script type="text/javascript">
+
+function makeHTTPRequest() {
+	words = document.getElementById('wordinput').value;
+	parameters = makeUrlParameters(words);
+	
+	var url = "/cgi-bin/sing/sing.py" + parameters;
+	http_request = new XMLHttpRequest();
+	http_request.onreadystatechange = function() {
+		if(http_request.readyState==4 && http_request.status==200) {
+      link = http_request.responseText;
+
+      // check for failure
+      if(link == "") {
+        message = "Composition failed. Try modifying words.";
+        document.getElementById('status').innerHTML = message;
+      } else {
+        message = "Sing!";
+        document.getElementById('status').innerHTML = "<a href='out/" + link  + "'>" + message + "</a>";
+      }
+    }
+	}
+
+	http_request.open("GET",url,true);
+	http_request.send();
+};
+
+function makeSong() {
+	document.getElementById('status').innerHTML = "composing...";
+	makeHTTPRequest();
+};
+   
+function makeUrlParameters(wordstring) {
+	params = "?";
+	wordsarray = wordstring.split(" ");
+	for(index=0; index<wordsarray.length; index++) {
+		params += "word" + (index+1) + "=" + wordsarray[index] + "&";
+	}
+	return params;
+}
+
+// allow enter key to press default button
+function checkEnter(e) {
+	var charCode;
+	if(e && e.which) {	// real browsers
+		e=e;
+		charCode = e.which;
+	}
+	else {	// IE
+		e = event;
+		charCode = e.keyCode;
+	}
+	
+	if(charCode == 13) {
+		makeSong();
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+</script>
+    
+<form>
+  <div id='inputarea'>
+    Enter your song lyrics<br>*must include only "root" words (no plurals):
+	  <p>
+	  <input type='text' id='wordinput' onKeyPress="return checkEnter(event);" />
+	  <p>
+	  <input type='button' value='Generate' onClick='makeSong()' />
+  </div>
+  
+  <div id='status'>
+  </div>
+  
+</form>
+<html>
